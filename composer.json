@@ -1,0 +1,44 @@
+{
+  "name": "malyusha/path-history",
+  "description": "Laravel package that allows you to create nested/human-readable paths(urls) for your eloquent models from attributes.",
+  "keywords": ["laravel", "slug", "model-url", "url", "path", "link", "sluggable", "SEO"],
+  "type": "library",
+  "require": {
+    "php": "^7.0",
+    "illuminate/support": "^5.4 || ^5.5 || ^5.6 || ^5.7",
+    "illuminate/database": "^5.4 || ^5.5 || ^5.6 || ^5.7",
+    "illuminate/routing": "^5.4 || ^5.5 || ^5.6 || ^5.7"
+  },
+  "require-dev": {
+    "orchestra/testbench": "~3.6.0",
+    "phpunit/phpunit": "^6.3|^7.0"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Igor Malyuk",
+      "email": "mii18@yandex.ru"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Malyusha\\PathHistory\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Malyusha\\PathHistory\\Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "stable",
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Malyusha\\PathHistory\\PathHistoryServiceProvider"
+      ]
+    },
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  }
+}
