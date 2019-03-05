@@ -1,0 +1,49 @@
+<?php
+/**
+ * This file is a part of Laravel Path History package.
+ * Developer:   Igor Malyuk <https://github.com/malyusha>
+ */
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreatePathHistory extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+     public function up()
+    {
+        Schema::create(config('path_history.table'), function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('link');
+            $table->unsignedBigInteger('related_id')->nullable();
+            $table->string('related_type')->nullable();
+            $table->boolean('is_current')->default(true);
+            $table->timestamps();
+
+            $this->addIndices($table);
+        });
+    }
+
+    protected function addIndices(Blueprint $table)
+    {
+        $table->index(['related_id', 'related_type']);
+        $table->index('link');
+        $table->index(['link', 'is_current']);
+        $table->index(['link', 'related_type', 'related_id']);
+        $table->index(['is_current', 'related_type', 'related_id']);
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists(config('path_history.table'));
+    }
+}
