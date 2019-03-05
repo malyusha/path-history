@@ -51,6 +51,7 @@ with new table creation.
 
 1. Include `\Malyusha\PathHistory\HasPathHistory` trait in your model;
 ```php
+<?php
     namespace App\Entities;
     
     use App\DescendantRetrievers\Shop\NestedSetDescendants;
