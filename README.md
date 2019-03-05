@@ -229,5 +229,4 @@ This kind of redirects needed when you need to redirect from old pages that have
 when you're migration from old version of website to new, you need to save all indexed pages and redirect them to new ones.
 Documentation in progress...
 
-## Examples
-**[Here](examples)** you'll find examples, showing how to use this package.
+## [Examples](examples)
