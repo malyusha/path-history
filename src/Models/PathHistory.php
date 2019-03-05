@@ -46,19 +46,21 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
      * @param string $link
      *
      * @return string|null
+     * @throws \Malyusha\PathHistory\Exceptions\PathHistoryException
      */
     public function getRedirectForLink(string $link)
     {
+        $typesMap = \Malyusha\PathHistory\Config::getNormalizedPaths();
+
         $selfRedirect = static::where(function ($query) use ($link) {
             $query->where('link', $link)->orWhere('link', '/'.$link);
         })->with('related')->where('is_current', false)->where('related_type', $this->getMorphClass())->first();
         if ($selfRedirect !== null && $selfRedirect->related !== null) {
             $config = '';
-            $prefixMap = $this->getPrefixesMap();
             $link = str_replace_first('/', '', $selfRedirect->related->link);
 
             if ($selfRedirect->related->related_type) {
-                $config = array_get($prefixMap, $selfRedirect->related->related_type, '');
+                $config = array_get($typesMap, $selfRedirect->related->related_type, '');
             }
 
             return $config.'/'.$link;
@@ -68,16 +70,16 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
         $types = [];
         // Prefix will be prepended to final link if it found
         $prefix = '';
-        foreach ((array) config('path_history.prefixes') as $config) {
+        foreach ($typesMap as $prefix => $map) {
             // If link doesn't start with prefix that defined in configuration we've nothing to do.
-            if (! starts_with($link, $p = $config['path'].'/')) {
+            if (! starts_with($link, $p = $prefix.'/')) {
                 continue;
             }
 
             // Otherwise we need to find prefix for the link and trim it to search, as database value doesn't contain
             // prefix
             $prefix = $p;
-            $types = array_get((array) $config, 'types', []);
+            $types = array_keys($map);
             // Remove prefix from link
             $link = str_replace_first($p, '', $link);
         }
@@ -100,24 +102,6 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
 
         // Return link with matched prefix prepended
         return $prefix.$actual->link;
-    }
-
-    /**
-     * Returns map of types and their path prefixes.
-     *
-     * @return array
-     */
-    protected function getPrefixesMap(): array
-    {
-        $map = [];
-
-        foreach ((array) config('path_history.prefixes', []) as $item) {
-            foreach (array_get($item, 'types') as $type) {
-                $map[$type] = $item['path'];
-            }
-        }
-
-        return $map;
     }
 
     /**

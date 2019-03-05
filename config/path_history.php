@@ -1,6 +1,14 @@
 <?php
 
 return [
+    /*
+    |-------------------------------------------------------------------------
+    | Path History table
+    |-------------------------------------------------------------------------
+    |
+    | Table where all urls for all models that are using trait will be stored.
+    |
+    */
     'table'           => 'path_history',
 
     /*
@@ -8,7 +16,7 @@ return [
     | Path History model
     |--------------------------------------------------------------------------
     |
-    | Instance of PathHistoryInterface.
+    | Instance of PathHistoryContract.
     |
     */
     'model'           => \Malyusha\PathHistory\Models\PathHistory::class,
@@ -35,11 +43,11 @@ return [
     | to  show some sections of your site not under root path (e.g. "/"), you can
     | set up which prefixes are responsible for which sections of site.
     | Example:
-    | 'prefixes' => [
+    | 'paths' => [
     |    [
     |        // Url that starting with "shop" (e.g. "/shop/{category_slug}",
     |        // "/shop/{category_slug}/{subcategory_slug}/{entity_slug}")
-    |        'path'  => 'shop',
+    |        'prefix'  => 'shop',
     |        // Types can be string (morph type) of class name. If it
     |        // represents morph type of class you should check if morph map is
     |        // set correctly.
@@ -47,6 +55,8 @@ return [
     |            'products',
     |            'product_categories',
     |        ],
+    |         // Setup global controller responsible for resolving this sections with given types
+    |         'controller' => 'App\Http\Controllers\ProductsSectionController',
     |    ],
     |   ],
     | `path` - Url that starting with "shop" (e.g. "/shop/{category_slug}",
@@ -54,7 +64,7 @@ return [
     | `types` - Types can be string (morph type) of class name. If it represents morph type of class you should check
     | if morph map is set correctly.
     */
-    'prefixes'        => [],
+    'paths'           => [],
 
     /*
     |--------------------------------------------------------------------------

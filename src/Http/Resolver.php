@@ -1,12 +1,13 @@
 <?php
 /**
  * This file is a part of Laravel Path History package.
- * Email:       mii18@yandex.ru
  * Developer:   Igor Malyuk <https://github.com/malyusha>
  */
 
 namespace Malyusha\PathHistory\Http;
 
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Malyusha\PathHistory\Config;
 use Malyusha\PathHistory\Contracts\PathHistoryContract;
 use Malyusha\PathHistory\Exceptions\PathHistoryException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -19,37 +20,64 @@ class Resolver extends \Illuminate\Routing\Controller
      * @param $path
      *
      * @return mixed|\Illuminate\Http\Response
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      * @throws \Malyusha\PathHistory\Exceptions\PathHistoryException
      */
     public function __invoke($path)
     {
-        $map = (array) config('path_history.controllers', []);
-        if (count($map) === 0) {
-            // We won't find any controller responsible for path if controllers map is empty.
+        $paths = Config::getNormalizedPaths();
+        if (count($paths) === 0) {
+            // We won't find any controller responsible for path if prefixes map is empty.
             throw new NotFoundHttpException;
         }
 
-        $pathInstance = app(PathHistoryContract::class)->getByLink($path, array_keys($map));
+        $pathInstance = app(PathHistoryContract::class)->getByLink($path, Config::getAvailableTypes());
 
         if ($pathInstance === null || ($related = $pathInstance->related) === null) {
             // We failed to find neither instance or related model for path instance. So we'll send 404.
             throw new NotFoundHttpException;
         }
-
         // Got prefix for model
-        $prefix = static::findPrefixForPathInstance($pathInstance);
-        if ($prefix !== '' && ! starts_with(request()->path(), $prefix.'/')) {
-            // If prefix was found, but request path doesn't start with such prefix we'll know, that we can't process
-            // this request because there can be a collision between two paths for different prefixes.
+        $prefixes = static::getMatchedPrefixes($pathInstance);
+
+        $matchedPrefix = $paths[$this->getMatchedPrefixFromRequest($prefixes)];
+
+        // Find morph type
+        $morphType = $related->getMorphClass();
+        // Get real model class as fallback
+        $model = Relation::getMorphedModel($morphType);
+        // Find controller from our map of model => controller
+        $controller = array_key_exists($morphType, $matchedPrefix) ? $matchedPrefix[$morphType]
+            : $matchedPrefix[$model];
+
+        // Call controller action for given entity.
+        return $this->proxyControllerCall(app($controller), $related);
+    }
+
+    /**
+     * Returns prefix that matches start of request path.
+     *
+     * @param array $prefixes Array of prefixes to search in.
+     *
+     * @return string
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    protected function getMatchedPrefixFromRequest(array $prefixes): string
+    {
+        $matched = '';
+        foreach ($prefixes as $prefix) {
+            if ($prefix !== '' && starts_with(request()->path(), $prefix.'/')) {
+                // If request path starts with prefix we need this one
+                $matched = $prefix;
+            }
+        }
+
+        if ($matched === '') {
+            // If prefix wasn't found we can't process request
             throw new NotFoundHttpException;
         }
 
-        if (array_key_exists($class = $related->getMorphClass(), $map)) {
-            // Call action if we find controller for given entity.
-            return $this->proxyControllerCall(app($map[$class]), $related);
-        }
-
-        throw new NotFoundHttpException;
+        return $matched;
     }
 
     /**
@@ -70,7 +98,7 @@ class Resolver extends \Illuminate\Routing\Controller
             return $controller($entity);
         }
 
-        throw new PathHistoryException(sprintf('Resolved controller %s must contain `show` method either be invokable'));
+        throw new PathHistoryException(sprintf('Resolved controller %s must contain `show` method either be invokable', $controller));
     }
 
     /**
@@ -78,23 +106,24 @@ class Resolver extends \Illuminate\Routing\Controller
      *
      * @param \Malyusha\PathHistory\Contracts\PathHistoryContract $pathHistory
      *
-     * @return string
+     * @return array
+     * @throws \Malyusha\PathHistory\Exceptions\PathHistoryException
      */
-    protected static function findPrefixForPathInstance(PathHistoryContract $pathHistory): string
+    protected static function getMatchedPrefixes(PathHistoryContract $pathHistory): array
     {
-        // Retrieve loaded relation
+        $matched = [];
+        // Retrieve related instance
         $related = $pathHistory->related;
-        // Retrieve morph type for relation
         $morphType = $related->getMorphClass();
 
-        foreach ((array) config('path_history.prefixes', []) as $prefix) {
+        foreach (Config::getNormalizedPaths() as $prefix => $map) {
             // Look up for type in prefixes map
-            if (in_array($morphType, $prefix['types'])) {
+            if (array_key_exists($related->getMorphClass(), $map) || array_key_exists(Relation::getMorphedModel($morphType), $map)) {
                 // If we got here it means that related model of path is responsible for returned prefix
-                return $prefix['path'];
+                $matched[] = $prefix;
             }
         }
 
-        return '';
+        return $matched;
     }
 }
