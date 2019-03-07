@@ -75,12 +75,11 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
         $types = [];
         // Prefix will be prepended to final link if it found
         $prefix = '';
-        foreach ($typesMap as $prefix => $map) {
+        foreach ($typesMap as $pref => $map) {
             // If link doesn't start with prefix that defined in configuration we've nothing to do.
-            if (! starts_with($link, $p = $prefix.'/')) {
+            if (! starts_with($link, $p = $pref.'/')) {
                 continue;
             }
-
             // Otherwise we need to find prefix for the link and trim it to search, as database value doesn't contain
             // prefix
             $prefix = $p;
