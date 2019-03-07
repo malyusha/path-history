@@ -28,7 +28,8 @@ trait HasPathHistory
                 return;
             }
 
-            if ($model->isDirty($model->getChangersAttributes()) && $model->getSlug() && ! $model->isExternal() && ! $model->isSlug()) {
+            if ($model->isDirty($model->getChangersAttributes()) && $model->getSlug() && ! $model->isExternal() && ! $model->isStub()) {
+
                 $model->generateNewPath();
 
                 $model->createDescendantsPaths();
@@ -55,7 +56,7 @@ trait HasPathHistory
         }
     }
 
-    protected function getChangersAttributes(): array
+    public function getChangersAttributes(): array
     {
         $default = [$this->slugAttribute()];
         if (property_exists($this, 'updatePathOnChangeAttributes')) {
@@ -138,7 +139,7 @@ trait HasPathHistory
      */
     protected function getPathParents(): \Illuminate\Support\Collection
     {
-        if (! property_exists($this, 'parentPathRelation')) {
+        if (! property_exists($this, 'parentPathRelation') || (string) $this->parentPathRelation === '') {
             throw new PathHistoryException('Model must have property parentRelation to use HasPathHistory trait');
         }
         $relation = $this->{$this->parentPathRelation}();

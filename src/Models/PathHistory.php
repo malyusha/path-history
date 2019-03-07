@@ -13,7 +13,7 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
     ];
 
     protected $casts = [
-        'is_current' => true,
+        'is_current' => 'bool',
     ];
 
     public function __construct(array $attributes = [])
@@ -29,6 +29,11 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
     public function related(): \Illuminate\Database\Eloquent\Relations\MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function getAll(array $columns = ['*']): \Illuminate\Support\Collection
+    {
+        return $this->newQuery()->get($columns);
     }
 
     /**
@@ -86,7 +91,6 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
 
         // Search for the first NOT CURRENT path instance
         $path = $this->queryForLink($link, false, $types)->first();
-
         if ($path === null) {
             // We don't need redirects because there are no links yet
             return null;
@@ -168,7 +172,7 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
      */
     public function isSelfRelated(): bool
     {
-        return $this->related_type === static::getMorphClass() && $this->related_type !== null;
+        return $this->related_type === $this->getMorphClass() && $this->related_type !== null;
     }
 
     /**

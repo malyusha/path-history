@@ -11,20 +11,23 @@ Sometimes you may want to create categorized news/articles/products pages and to
 * Create routes for each entity. So for each change in base route parameters you will change it's dependencies.
 * Create route for category(ies):
 
-`Route::get('{category_slug}')->name('products_category')->uses('ProductCategoryController@showCategory')`;
+```php
+Route::get('{category_slug}')->name('products_category')->uses('ProductCategoryController@showCategory');
+```
 * Then create route for product:
 
-`Route::get('{category_slug}/{product_identifier}')->name('product')->uses('ProductsController@showProduct')`;
-    
+```php
+Route::get('{category_slug}/{product_identifier}')->name('product')->uses('ProductsController@showProduct');
+```
 But what if you have nested categories for each entity? Ok, we can handle it, just add `where` condition with pattern on routes:
 `->where('category_slug', '[\w\-/_]+')`. So, now your router will know that `category_slug` can contain slashes, but
 how can we determine where `category_slug` ends and where `product_identifier` starts? That's it, we need to prefix
 our product/article route to tell resolver how it works.
 
 Modifying last route:
-
-`Route::get('{category_slug}/p-{product_identifier}')->name('product')->uses('ProductsController@showProduct');`
-
+```php
+Route::get('{category_slug}/p-{product_identifier}')->name('product')->uses('ProductsController@showProduct');
+```
 will give us what we wanted. 
 
 So what are the **main problems** of this method?
@@ -142,15 +145,16 @@ public function showIndex()
 }
 ```
 
-`// index_page.blade.php'
+`// index_page.blade.php`
 ```blade
 @extends('layouts.default')
 
 @section('content')
 <h1>Products</h1>
+
 @foreach($products as $product)
-<img src="{{ $product->getImage() }}}">
-<a href="{{ route('shop.resolve', ['path' => $product->path]) }}">{{ $product->name }}</a>
+    <img src="{{ $product->getImage() }}}">
+    <a href="{{ route('shop.resolve', ['path' => $product->path]) }}">{{ $product->name }}</a>
 @endforeach
 @endsection
 ```
