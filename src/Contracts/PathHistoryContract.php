@@ -16,6 +16,15 @@ interface PathHistoryContract
     public function related(): \Illuminate\Database\Eloquent\Relations\MorphTo;
 
     /**
+     * Returns all path history items.
+     *
+     * @param array $columns
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getAll(array $columns = ['*']): \Illuminate\Support\Collection;
+
+    /**
      * Unmarks all history as not current after new instance creation.
      *
      * @return void
@@ -58,7 +67,7 @@ interface PathHistoryContract
     public function deleteSelfRelated();
 
     /**
-     * Checks if path is self-related.
+     * Checks if path is self-related. Self-related entity is the entity with the same related (polymorphic type).
      *
      * @return bool
      */
@@ -81,5 +90,4 @@ interface PathHistoryContract
      * @return void
      */
     public static function observe($classes);
-
 }
