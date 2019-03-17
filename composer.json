@@ -11,7 +11,8 @@
   },
   "require-dev": {
     "orchestra/testbench": "~3.6.0",
-    "phpunit/phpunit": "^6.3|^7.0"
+    "phpunit/phpunit": "^6.3|^7.0",
+    "mockery/mockery": "^1.2"
   },
   "license": "MIT",
   "authors": [

@@ -17,13 +17,14 @@ class Resolver extends \Illuminate\Routing\Controller
     /**
      * Resolves controller and entity for given path.
      *
+     * @param \Illuminate\Http\Request $request
      * @param $path
      *
      * @return mixed|\Illuminate\Http\Response
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      * @throws \Malyusha\PathHistory\Exceptions\PathHistoryException
      */
-    public function __invoke($path)
+    public function __invoke(\Illuminate\Http\Request $request, $path)
     {
         $paths = Config::getNormalizedPaths();
         if (count($paths) === 0) {
@@ -32,15 +33,13 @@ class Resolver extends \Illuminate\Routing\Controller
         }
 
         $pathInstance = app(PathHistoryContract::class)->getByLink($path, Config::getAvailableTypes());
-
         if ($pathInstance === null || ($related = $pathInstance->related) === null) {
             // We failed to find neither instance or related model for path instance. So we'll send 404.
             throw new NotFoundHttpException;
         }
         // Got prefix for model
         $prefixes = static::getMatchedPrefixes($pathInstance);
-
-        $matchedPrefix = $paths[$this->getMatchedPrefixFromRequest($prefixes)];
+        $matchedPrefix = $paths[$this->getMatchedPrefixFromRequest($request, $prefixes)];
 
         // Find morph type
         $morphType = $related->getMorphClass();
@@ -57,16 +56,17 @@ class Resolver extends \Illuminate\Routing\Controller
     /**
      * Returns prefix that matches start of request path.
      *
+     * @param \Illuminate\Http\Request $request
      * @param array $prefixes Array of prefixes to search in.
      *
      * @return string
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    protected function getMatchedPrefixFromRequest(array $prefixes): string
+    protected function getMatchedPrefixFromRequest(\Illuminate\Http\Request $request, array $prefixes): string
     {
         $matched = '';
         foreach ($prefixes as $prefix) {
-            if ($prefix !== '' && starts_with(request()->path(), $prefix.'/')) {
+            if ($prefix !== '' && starts_with($request->path(), $prefix.'/')) {
                 // If request path starts with prefix we need this one
                 $matched = $prefix;
             }

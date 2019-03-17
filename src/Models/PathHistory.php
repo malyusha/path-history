@@ -13,7 +13,7 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
     ];
 
     protected $casts = [
-        'is_current' => true,
+        'is_current' => 'bool',
     ];
 
     public function __construct(array $attributes = [])
@@ -29,6 +29,11 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
     public function related(): \Illuminate\Database\Eloquent\Relations\MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function getAll(array $columns = ['*']): \Illuminate\Support\Collection
+    {
+        return $this->newQuery()->get($columns);
     }
 
     /**
@@ -70,12 +75,11 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
         $types = [];
         // Prefix will be prepended to final link if it found
         $prefix = '';
-        foreach ($typesMap as $prefix => $map) {
+        foreach ($typesMap as $pref => $map) {
             // If link doesn't start with prefix that defined in configuration we've nothing to do.
-            if (! starts_with($link, $p = $prefix.'/')) {
+            if (! starts_with($link, $p = $pref.'/')) {
                 continue;
             }
-
             // Otherwise we need to find prefix for the link and trim it to search, as database value doesn't contain
             // prefix
             $prefix = $p;
@@ -86,7 +90,6 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
 
         // Search for the first NOT CURRENT path instance
         $path = $this->queryForLink($link, false, $types)->first();
-
         if ($path === null) {
             // We don't need redirects because there are no links yet
             return null;
@@ -168,7 +171,7 @@ class PathHistory extends \Illuminate\Database\Eloquent\Model implements PathHis
      */
     public function isSelfRelated(): bool
     {
-        return $this->related_type === static::getMorphClass() && $this->related_type !== null;
+        return $this->related_type === $this->getMorphClass() && $this->related_type !== null;
     }
 
     /**

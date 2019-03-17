@@ -4,9 +4,9 @@
  * Developer:   Igor Malyuk <https://github.com/malyusha>
  */
 
-namespace Malyusha\PathHistory\Tests\Http;
+namespace Malyusha\PathHistory\Tests\Controllers;
 
-class PathHistoryResolverTest
+class InvalidController extends \Illuminate\Routing\Controller
 {
 
 }

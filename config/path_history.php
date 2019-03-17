@@ -65,21 +65,4 @@ return [
     | if morph map is set correctly.
     */
     'paths'           => [],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Controllers for paths
-    |--------------------------------------------------------------------------
-    |
-    | This property represents map of type -> controller, responsible for
-    | resolving which controller should be called on specific path.
-    | Imagine user comes to our "/shop/{...path}" path. How will we process this
-    | specific path and which controller method should we call to show content
-    | for this path? This property makes us aware of this case.
-    | Example:
-    | 'controllers' => [
-    |     Model::class => Controller::class,
-    | ]
-    */
-    'controllers'     => [],
 ];

@@ -81,11 +81,16 @@ trait HasSlug
     public function setSlugAttribute($slug)
     {
         if ($slug) {
-            $this->makeSlug('slug', $slug);
+            $this->makeSlug($this->slugAttribute(), $slug);
         }
     }
 
-    public function isSlug(): bool
+    /**
+     * Checks if slug is stub.
+     *
+     * @return bool
+     */
+    public function isStub(): bool
     {
         return $this->isStubLink($this->getSlug());
     }
