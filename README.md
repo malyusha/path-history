@@ -1,3 +1,6 @@
+<p align="center">
+    <img src="https://travis-ci.com/malyusha/path-history.svg?branch=master">
+</p>
 # Path History
 Laravel package that allows you to create nested/human-readable paths(urls) for your eloquent models.
 
