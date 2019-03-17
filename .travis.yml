@@ -18,4 +18,4 @@ cache:
 before_scripts:
   - composer install --prefer-source --no-interaction --dev
 
-script: vendor/bin/phpunit
+script: ./vendor/bin/phpunit
