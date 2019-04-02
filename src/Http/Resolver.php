@@ -66,7 +66,13 @@ class Resolver extends \Illuminate\Routing\Controller
     {
         $matched = '';
         foreach ($prefixes as $prefix) {
-            if ($prefix !== '' && starts_with($request->path(), $prefix.'/')) {
+            if ($prefix === '') {
+                // If prefix is empty, it will mean, thah it's root level of path
+                return $matched;
+            }
+
+
+            if (starts_with($request->path(), $prefix . '/')) {
                 // If request path starts with prefix we need this one
                 $matched = $prefix;
             }
